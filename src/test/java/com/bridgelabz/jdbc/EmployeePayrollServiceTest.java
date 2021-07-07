@@ -1,4 +1,3 @@
-
 package com.bridgelabz.jdbc;
 
 import java.util.List;
@@ -11,11 +10,22 @@ import model.EmployeePayrollData;
 import service.EmployeePayrollService;
 
 public class EmployeePayrollServiceTest {
-	 @Test
-	    public void givenEmployeePayrollInDB_WhenDataRetrieved_ShouldMatchEmployeeCount() throws DatabaseConnectionException{
-	        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
-	        List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData();
-	        Assert.assertEquals(4, employeePayrollData.size());
-	    }
 
+	@Test
+	public void givenEmployeePayrollInDB_WhenDataRetrieved_ShouldMatchEmployeeCount()
+			throws DatabaseConnectionException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData();
+		Assert.assertEquals(3, employeePayrollData.size());
+	}
+
+	@Test
+	public void givenEmployeePayrollInDB_WhenUpdated_ShouldSyncWithDB() throws DatabaseConnectionException {
+		List<EmployeePayrollData> employeePayrollData;
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollData = employeePayrollService.readEmployeePayrollData();
+		employeePayrollService.updateEmployeeSalary("Terisa", 30000000.00);
+		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Terisa");
+		Assert.assertTrue(result);
+	}
 }
