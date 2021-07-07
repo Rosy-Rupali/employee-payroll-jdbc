@@ -2,6 +2,7 @@ package service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,6 +14,27 @@ import exception.DatabaseConnectionException;
 import model.EmployeePayrollData;
 
 public class EmployeePayrollDBService {
+	 //declared private variables
+	private static EmployeePayrollDBService employeePayrollDBService;
+	private PreparedStatement preparedStatement;
+
+	/**
+	 *created default constructor
+	 */
+	public EmployeePayrollDBService() {
+	}
+
+	/**
+	 * created singleton design pattern to single instance by using getInstance()
+	 * @return employeePayrollDBService
+	 */
+	public static EmployeePayrollDBService getInstance() {
+		if (employeePayrollDBService == null) {
+			employeePayrollDBService = new EmployeePayrollDBService();
+		}
+		return employeePayrollDBService;
+	}
+
 	/**
 	 * created getConnection() method to make connection with mysql database
 	 * @return connection
@@ -34,9 +56,9 @@ public class EmployeePayrollDBService {
 	}
 
 	/**
-	 * created a readData() to read data from database table
+	 * created a readData() method to read data from database table
      * added try and catch block to throw sql exception
-	 * @return employeepayrollList
+	 * @return employeePayrollList
 	 * @throws DatabaseConnectionException
 	 */
 	public List<EmployeePayrollData> readData() throws DatabaseConnectionException {
@@ -60,9 +82,10 @@ public class EmployeePayrollDBService {
 	}
 
 	/**
+	 * This method is use to execute the update statement of the query
 	 * @param name
 	 * @param salary
-	 * @return
+	 * @return total rows updated
 	 * @throws DatabaseConnectionException
 	 */
 	public int updateEmployeeDataUsingStatement(String name, double salary) throws DatabaseConnectionException {
@@ -77,10 +100,46 @@ public class EmployeePayrollDBService {
 	}
 
 	/**
-	 * created getEmployeePayrollData method to get data from database
+	 * This method is use to execute the update statement of the query using prepared statement
+	 * @param name
+	 * @param salary
+	 * @return total rows updated
+	 * @throws DatabaseConnectionException
+	 */
+	public int updateEmployeePayrollDataUsingPreparedStatement(String name, double salary)
+			throws DatabaseConnectionException {
+		if (this.preparedStatement == null) {
+			this.prepareStatementForEmployeePayroll();
+		}
+		try {
+			preparedStatement.setDouble(1, salary);
+			preparedStatement.setString(2, name);
+			int rowsAffected = preparedStatement.executeUpdate();
+			return rowsAffected;
+		} catch (SQLException e) {
+			throw new DatabaseConnectionException("Unable to use prepared statement");
+		}
+	}
+
+	/**
+	 * prepareStatementForEmployeeData method for single query to get the data from database
      * added try and catch block to throw sql exception
-	 * @param name : first argument of the method
-	 * @return employeepayrollList
+	 * @throws DatabaseConnectionException
+	 */
+	private void prepareStatementForEmployeePayroll() throws DatabaseConnectionException {
+		try {
+			Connection connection = this.getConnection();
+			String sql = "update employee_payroll set salary=? where name=?";
+			this.preparedStatement = connection.prepareStatement(sql);
+		} catch (SQLException e) {
+			throw new DatabaseConnectionException("Unable to prepare statement");
+		}
+	}
+
+	/**
+	 * created getEmployeePayrollData method to get all data from database table
+	 * @param name : first argument of method
+	 * @return employeePayrollList
 	 * @throws DatabaseConnectionException
 	 */
 	public List<EmployeePayrollData> getEmployeePayrollDataFromDB(String name) throws DatabaseConnectionException {
