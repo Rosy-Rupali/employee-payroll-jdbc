@@ -14,18 +14,19 @@ import exception.DatabaseConnectionException;
 import model.EmployeePayrollData;
 
 public class EmployeePayrollDBService {
-	 //declared private variables
-	private static EmployeePayrollDBService employeePayrollDBService;
-	private PreparedStatement preparedStatement;
 
-	/**
-	 *created default constructor
-	 */
+	private static EmployeePayrollDBService employeePayrollDBService;
+	private PreparedStatement preparedStatementForUpdation;
+	private PreparedStatement employeePayrollDataStatement;
+
+	//created default constructor
 	public EmployeePayrollDBService() {
+
 	}
 
 	/**
 	 * created singleton design pattern to single instance by using getInstance()
+	 * 
 	 * @return employeePayrollDBService
 	 */
 	public static EmployeePayrollDBService getInstance() {
@@ -37,6 +38,7 @@ public class EmployeePayrollDBService {
 
 	/**
 	 * created getConnection() method to make connection with mysql database
+	 * 
 	 * @return connection
 	 * @throws DatabaseConnectionException
 	 */
@@ -57,28 +59,44 @@ public class EmployeePayrollDBService {
 
 	/**
 	 * created a readData() method to read data from database table
-     * added try and catch block to throw sql exception
+	 * 
 	 * @return employeePayrollList
 	 * @throws DatabaseConnectionException
 	 */
 	public List<EmployeePayrollData> readData() throws DatabaseConnectionException {
 		String sql = "select * from employee_payroll; ";
-		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
 		try (Connection connection = this.getConnection()) {
 			Statement statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery(sql);
-			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
-				String name = resultSet.getString("name");
-				double salary = resultSet.getDouble("salary");
-				LocalDate startDate = resultSet.getDate("start").toLocalDate();
-				employeePayrollList.add(new EmployeePayrollData(id, name, salary, startDate));
-			}
+			return this.getEmployeePayrollListFromResultset(resultSet);
 		} catch (SQLException e) {
 			throw new DatabaseConnectionException("Unable to get data.Please check table");
 		}
+	}
 
-		return employeePayrollList;
+	/**
+	 * created private method to get all data from database table added try and
+	 * catch block to throw sql exception
+	 * 
+	 * @param resultSet
+	 * @return employeePayrollList
+	 * @throws DatabaseConnectionException
+	 */
+	private List<EmployeePayrollData> getEmployeePayrollListFromResultset(ResultSet resultSet)
+			throws DatabaseConnectionException {
+		List<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
+		try {
+			while (resultSet.next()) {
+				int id = resultSet.getInt("id");
+				String objectname = resultSet.getString("name");
+				double salary = resultSet.getDouble("salary");
+				LocalDate start = resultSet.getDate("start").toLocalDate();
+				employeePayrollList.add(new EmployeePayrollData(id, objectname, salary, start));
+			}
+			return employeePayrollList;
+		} catch (SQLException e) {
+			throw new DatabaseConnectionException("Unable to use the result set");
+		}
 	}
 
 	/**
@@ -108,13 +126,13 @@ public class EmployeePayrollDBService {
 	 */
 	public int updateEmployeePayrollDataUsingPreparedStatement(String name, double salary)
 			throws DatabaseConnectionException {
-		if (this.preparedStatement == null) {
+		if (this.preparedStatementForUpdation == null) {
 			this.prepareStatementForEmployeePayroll();
 		}
 		try {
-			preparedStatement.setDouble(1, salary);
-			preparedStatement.setString(2, name);
-			int rowsAffected = preparedStatement.executeUpdate();
+			preparedStatementForUpdation.setDouble(1, salary);
+			preparedStatementForUpdation.setString(2, name);
+			int rowsAffected = preparedStatementForUpdation.executeUpdate();
 			return rowsAffected;
 		} catch (SQLException e) {
 			throw new DatabaseConnectionException("Unable to use prepared statement");
@@ -130,34 +148,46 @@ public class EmployeePayrollDBService {
 		try {
 			Connection connection = this.getConnection();
 			String sql = "update employee_payroll set salary=? where name=?";
-			this.preparedStatement = connection.prepareStatement(sql);
+			this.preparedStatementForUpdation = connection.prepareStatement(sql);
 		} catch (SQLException e) {
-			throw new DatabaseConnectionException("Unable to prepare statement");
+			throw new DatabaseConnectionException("Unable to create prepare statement");
 		}
 	}
 
 	/**
-	 * created getEmployeePayrollData method to get all data from database table
-	 * @param name : first argument of method
+	 * created getEmployeePayrollData method to get data from database
+	 * @param name
 	 * @return employeePayrollList
 	 * @throws DatabaseConnectionException
 	 */
 	public List<EmployeePayrollData> getEmployeePayrollDataFromDB(String name) throws DatabaseConnectionException {
-		String sql = String.format("select * from employee_payroll where name='%s'", name);
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
+		if (this.employeePayrollDataStatement == null) {
+			this.prepareStatementForEmployeePayrollDataRetrieval();
+		}
 		try (Connection connection = this.getConnection()) {
-			Statement statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery(sql);
-			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
-				String objectname = resultSet.getString("name");
-				double salary = resultSet.getDouble("salary");
-				LocalDate start = resultSet.getDate("start").toLocalDate();
-				employeePayrollList.add(new EmployeePayrollData(id, objectname, salary, start));
-			}
-			return employeePayrollList;
+			this.employeePayrollDataStatement.setString(1, name);
+			ResultSet resultSet = employeePayrollDataStatement.executeQuery();
+			employeePayrollList = this.getEmployeePayrollListFromResultset(resultSet);
 		} catch (SQLException e) {
-			throw new DatabaseConnectionException("Unable to get data from database");
+			throw new DatabaseConnectionException("Unable to read data");
+		}
+		return employeePayrollList;
+	}
+
+	/**
+	 * prepareStatementForEmployeeData method for single query to get the data from
+	 * database added try and catch block to throw sql exception
+	 * 
+	 * @throws DatabaseConnectionException
+	 */
+	private void prepareStatementForEmployeePayrollDataRetrieval() throws DatabaseConnectionException {
+		try {
+			Connection connection = this.getConnection();
+			String sql = "select * from employee_payroll where name=?";
+			this.employeePayrollDataStatement = connection.prepareStatement(sql);
+		} catch (SQLException e) {
+			throw new DatabaseConnectionException("Unable to create prepare statement");
 		}
 	}
 }
