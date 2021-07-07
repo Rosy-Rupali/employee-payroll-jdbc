@@ -1,5 +1,6 @@
 package com.bridgelabz.jdbc;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.Assert;
@@ -28,4 +29,15 @@ public class EmployeePayrollServiceTest {
 		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Terisa");
 		Assert.assertTrue(result);
 	}
+	
+	 @Test
+	    public void givenEmployeePayrollDataWhenRetrievedBasedOnStartDateShouldReturnProperResult() throws DatabaseConnectionException {
+				EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+				employeePayrollService.readEmployeePayrollData();
+				LocalDate startDate = LocalDate.parse("2019-01-31");
+				LocalDate endDate = LocalDate.parse("2020-01-31");
+				List<EmployeePayrollData> matchingRecords = employeePayrollService
+						.getEmployeePayrollDataByStartDate(startDate, endDate);
+				Assert.assertEquals(matchingRecords.get(0), employeePayrollService.getEmployeePayrollData("Terisa"));
+		}
 }
