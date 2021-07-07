@@ -11,7 +11,7 @@ public class EmployeePayrollService {
 	private List<EmployeePayrollData> employeePayrollList;
 
 	public EmployeePayrollService() {
-		this.employeePayrollDBService = EmployeePayrollDBService.getInstance();
+		this.employeePayrollDBService = new EmployeePayrollDBService();
 	}
 
 	public List<EmployeePayrollData> readEmployeePayrollData() throws DatabaseConnectionException {
@@ -20,7 +20,7 @@ public class EmployeePayrollService {
 	}
 
 	public void updateEmployeeSalary(String name, double salary) throws DatabaseConnectionException {
-		int result = new EmployeePayrollDBService().updateEmployeePayrollDataUsingPreparedStatement(name, salary);
+		int result = new EmployeePayrollDBService().updateEmployeeDataUsingStatement(name, salary);
 		if (result == 0)
 			return;
 		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
