@@ -19,7 +19,7 @@ public class EmployeePayrollDBService {
 	private PreparedStatement preparedStatementForUpdation;
 	private PreparedStatement employeePayrollDataStatement;
 
-	//created default constructor
+	// created default constructor
 	public EmployeePayrollDBService() {
 
 	}
@@ -101,6 +101,7 @@ public class EmployeePayrollDBService {
 
 	/**
 	 * This method is use to execute the update statement of the query
+	 * 
 	 * @param name
 	 * @param salary
 	 * @return total rows updated
@@ -118,7 +119,9 @@ public class EmployeePayrollDBService {
 	}
 
 	/**
-	 * This method is use to execute the update statement of the query using prepared statement
+	 * This method is use to execute the update statement of the query using
+	 * prepared statement
+	 * 
 	 * @param name
 	 * @param salary
 	 * @return total rows updated
@@ -140,8 +143,9 @@ public class EmployeePayrollDBService {
 	}
 
 	/**
-	 * prepareStatementForEmployeeData method for single query to get the data from database
-     * added try and catch block to throw sql exception
+	 * prepareStatementForEmployeeData method for single query to get the data from
+	 * database added try and catch block to throw sql exception
+	 * 
 	 * @throws DatabaseConnectionException
 	 */
 	private void prepareStatementForEmployeePayroll() throws DatabaseConnectionException {
@@ -156,6 +160,7 @@ public class EmployeePayrollDBService {
 
 	/**
 	 * created getEmployeePayrollData method to get data from database
+	 * 
 	 * @param name
 	 * @return employeePayrollList
 	 * @throws DatabaseConnectionException
@@ -188,6 +193,25 @@ public class EmployeePayrollDBService {
 			this.employeePayrollDataStatement = connection.prepareStatement(sql);
 		} catch (SQLException e) {
 			throw new DatabaseConnectionException("Unable to create prepare statement");
+		}
+	}
+	
+	/**
+	 * created method to retrieve data from data base in a particular date range
+	 * @param startDate in LocalDate format
+	 * @param endDate in LocalDate format
+	 * @return this.getEmployeePayrollListFromResultset(resultSet)
+	 * @throws DatabaseConnectionException
+	 */
+	public List<EmployeePayrollData> getEmployeePayrollDataByStartingDate(LocalDate startDate, LocalDate endDate) throws DatabaseConnectionException {
+		String sql = String.format("select * from employee_payroll where start between cast('%s' as date) and cast('%s' as date);",
+				startDate.toString(), endDate.toString());
+		try (Connection connection = this.getConnection()) {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet = statement.executeQuery(sql);
+			return this.getEmployeePayrollListFromResultset(resultSet);
+		} catch (SQLException e) {
+			throw new DatabaseConnectionException("Connection Failed.");
 		}
 	}
 }
