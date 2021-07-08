@@ -18,7 +18,7 @@ public class EmployeePayrollServiceTest {
 			throws DatabaseConnectionException {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData();
-		Assert.assertEquals(3, employeePayrollData.size());
+		Assert.assertEquals(4, employeePayrollData.size());
 	}
 
 	@Test
@@ -30,24 +30,34 @@ public class EmployeePayrollServiceTest {
 		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Terisa");
 		Assert.assertTrue(result);
 	}
-	
-	 @Test
-	    public void givenEmployeePayrollDataWhenRetrievedBasedOnStartDateShouldReturnProperResult() throws DatabaseConnectionException {
-				EmployeePayrollService employeePayrollService = new EmployeePayrollService();
-				employeePayrollService.readEmployeePayrollData();
-				LocalDate startDate = LocalDate.parse("2019-01-31");
-				LocalDate endDate = LocalDate.parse("2020-01-31");
-				List<EmployeePayrollData> matchingRecords = employeePayrollService
-						.getEmployeePayrollDataByStartDate(startDate, endDate);
-				Assert.assertEquals(matchingRecords.get(0), employeePayrollService.getEmployeePayrollData("Terisa"));
-		}
-	 
-	 @Test
-	 
-	    public void givenEmployeePerformed_VariousOperations_ShouldGiveProperResult() throws DatabaseConnectionException {
-			EmployeePayrollService employeePayrollService = new EmployeePayrollService();
-			employeePayrollService.readEmployeePayrollData();
-			Map<String, Double> averageSalaryByGender=employeePayrollService.performOperationByGender("salary","MAX");
-			Assert.assertEquals(30000000.0, averageSalaryByGender.get("F"), 0.0);
+
+	@Test
+	public void givenEmployeePayrollDataWhenRetrievedBasedOnStartDateShouldReturnProperResult()
+			throws DatabaseConnectionException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollData();
+		LocalDate startDate = LocalDate.parse("2019-01-31");
+		LocalDate endDate = LocalDate.parse("2020-01-31");
+		List<EmployeePayrollData> matchingRecords = employeePayrollService.getEmployeePayrollDataByStartDate(startDate,
+				endDate);
+		Assert.assertEquals(matchingRecords.get(0), employeePayrollService.getEmployeePayrollData("Terisa"));
+	}
+
+	@Test
+
+	public void givenEmployeePerformed_VariousOperations_ShouldGiveProperResult() throws DatabaseConnectionException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollData();
+		Map<String, Double> averageSalaryByGender = employeePayrollService.performOperationByGender("salary", "MAX");
+		Assert.assertEquals(30000000.0, averageSalaryByGender.get("F"), 0.0);
+	}
+
+	@Test
+	public void givenNewEmployee_WhenAdded_ShouldGiveProperResult() throws DatabaseConnectionException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollData();
+		employeePayrollService.addEmployeeToPayroll("Mark", 500000.00, "M", LocalDate.now());
+		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Mark");
+		Assert.assertTrue(result);
 	}
 }
