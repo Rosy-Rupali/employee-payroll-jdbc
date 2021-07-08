@@ -2,6 +2,7 @@ package com.bridgelabz.jdbc;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,4 +41,13 @@ public class EmployeePayrollServiceTest {
 						.getEmployeePayrollDataByStartDate(startDate, endDate);
 				Assert.assertEquals(matchingRecords.get(0), employeePayrollService.getEmployeePayrollData("Terisa"));
 		}
+	 
+	 @Test
+	 
+	    public void givenEmployeePerformed_VariousOperations_ShouldGiveProperResult() throws DatabaseConnectionException {
+			EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+			employeePayrollService.readEmployeePayrollData();
+			Map<String, Double> averageSalaryByGender=employeePayrollService.performOperationByGender("salary","MAX");
+			Assert.assertEquals(30000000.0, averageSalaryByGender.get("F"), 0.0);
+	}
 }
