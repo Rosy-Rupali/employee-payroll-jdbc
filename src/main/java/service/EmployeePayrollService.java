@@ -3,6 +3,7 @@ package service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import exception.DatabaseConnectionException;
 import model.EmployeePayrollData;
@@ -74,12 +75,25 @@ public class EmployeePayrollService {
 	}
 	
 	/**
-	 * @param startDate
-	 * @param endDate
-	 * @return
+	 * created getEmployeePayrollDateByStartDate method to get data from database in particular date range
+	 * @param startDate : start date in LocalDate format
+	 * @param endDate : end date in LocalDate format
+	 * @return this.employeePayrollDBService.getEmployeePayrollDataByStartingDate(startDate, endDate)
 	 * @throws EmployeePayrollJDBCException
 	 */
 	public List<EmployeePayrollData> getEmployeePayrollDataByStartDate(LocalDate startDate, LocalDate endDate)throws DatabaseConnectionException {
 		return this.employeePayrollDBService.getEmployeePayrollDataByStartingDate(startDate, endDate);
+	}
+	
+	/**
+	 * created performOperationByGender method to get maximum, minimum, count, sum and average 
+	 * of salary by gender data from database
+	 * @param column : salary
+	 * @param operation  average, min, max, count and sum 
+	 * @return this.employeePayrollDBService.performVariousOperations(column,operation)
+	 * @throws DatabaseConnectionException
+	 */
+	public Map<String, Double> performOperationByGender(String column,String operation) throws DatabaseConnectionException {
+		return this.employeePayrollDBService.performVariousOperations(column,operation);
 	}
 }

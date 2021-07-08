@@ -8,7 +8,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import exception.DatabaseConnectionException;
 import model.EmployeePayrollData;
@@ -213,5 +215,31 @@ public class EmployeePayrollDBService {
 		} catch (SQLException e) {
 			throw new DatabaseConnectionException("Connection Failed.");
 		}
+	}
+	
+	/**
+	 * created performVariousOperation method to get average, min, max, count and sum of salary
+	 * group by gender data from database
+     * by using mysql query in the method and mapped gender and  average, min, max, count and sum of Salary
+	 * @param column : salary
+	 * @param operation :  average, min, max, count and sum 
+	 * @return the salary used by various operations mapped with gender
+	 * @throws DatabaseConnectionException
+	 */
+	public Map<String, Double> performVariousOperations(String column, String operation) throws DatabaseConnectionException{
+		String sql=String.format("select gender , %s(%s) from employee_payroll group by gender;" , operation , column);
+		Map<String,Double> mapValues = new HashMap<>();
+		try(Connection connection = this.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next())
+			{
+				mapValues.put(resultSet.getString(1), resultSet.getDouble(2));
+			}
+		}
+		catch (SQLException e) {
+			throw new DatabaseConnectionException("Connection Failed.");
+		}
+		return mapValues;
 	}
 }
