@@ -96,4 +96,16 @@ public class EmployeePayrollService {
 	public Map<String, Double> performOperationByGender(String column,String operation) throws DatabaseConnectionException {
 		return this.employeePayrollDBService.performVariousOperations(column,operation);
 	}
+	
+	/**
+	 * added new employee to employeePayrollList
+	 * @param name : first argument of the method
+	 * @param salary : second argument of the method
+	 * @param startdate : fourth argument of the method
+	 * @param gender : third argument of the method
+	 * @throws EmployeePayrollJDBCException
+	 */
+	public void addEmployeeToPayroll(String name, double salary, String gender, LocalDate startdate) throws DatabaseConnectionException {
+		employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name,salary,gender,startdate));
+	}
 }

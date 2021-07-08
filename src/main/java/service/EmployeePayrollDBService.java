@@ -92,8 +92,9 @@ public class EmployeePayrollDBService {
 				int id = resultSet.getInt("id");
 				String objectname = resultSet.getString("name");
 				double salary = resultSet.getDouble("salary");
+				String gender = resultSet.getString("gender");
 				LocalDate start = resultSet.getDate("start").toLocalDate();
-				employeePayrollList.add(new EmployeePayrollData(id, objectname, salary, start));
+				employeePayrollList.add(new EmployeePayrollData(id, objectname, salary,  gender, start));
 			}
 			return employeePayrollList;
 		} catch (SQLException e) {
@@ -241,5 +242,33 @@ public class EmployeePayrollDBService {
 			throw new DatabaseConnectionException("Connection Failed.");
 		}
 		return mapValues;
+	}
+	
+	/**
+	 * added new employee to database
+	 * @param name : first argument of the method
+	 * @param salary : second argument of the method
+	 * @param startdate : fourth argument of the method
+	 * @param gender : third argument of the method
+	 * @return employeePayrollData
+	 * @throws DatabaseConnectionException
+	 */
+	public EmployeePayrollData addEmployeeToPayroll(String name, double salary, String gender, LocalDate startdate) throws DatabaseConnectionException {
+		int employeeId=-1;
+		EmployeePayrollData employeePayrollData=null;
+		String sql=String.format("INSERT INTO employee_payroll (name,salary,gender,start) VALUES ('%s','%s','%s','%s')",name,salary,gender,startdate);
+		try(Connection connection=this.getConnection()){
+			Statement statement=connection.createStatement();
+			int rowsAffected=statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+			if(rowsAffected==1)
+			{
+				ResultSet resultSet=statement.getGeneratedKeys();
+				if(resultSet.next()) employeeId=resultSet.getInt(1);
+			}
+			employeePayrollData=new EmployeePayrollData(employeeId, name, salary, gender, startdate);
+		}
+		catch (SQLException e) {
+			throw new DatabaseConnectionException("Could Not Add");}
+		return employeePayrollData;
 	}
 }
