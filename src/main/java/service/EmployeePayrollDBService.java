@@ -1,3 +1,9 @@
+/********************************************************************************************
+ * @Purpose Employee Payroll Database Service program to perform various operations in database. 
+ * @author Rosy Rupali
+ * @version 1.0
+ * @since 07-07-2021
+ ************************************************************************************************/
 package service;
 
 import java.sql.Connection;
@@ -146,7 +152,7 @@ public class EmployeePayrollDBService {
 	}
 
 	/**
-	 * prepareStatementForEmployeeData method for single query to get the data from
+	 * prepareStatementForEmployeePayroll method for single query to get the data from
 	 * database added try and catch block to throw sql exception
 	 * 
 	 * @throws DatabaseConnectionException
@@ -162,7 +168,7 @@ public class EmployeePayrollDBService {
 	}
 
 	/**
-	 * created getEmployeePayrollData method to get data from database
+	 * created getEmployeePayrollDataFromDB method to get data from database
 	 * 
 	 * @param name
 	 * @return employeePayrollList
@@ -184,7 +190,7 @@ public class EmployeePayrollDBService {
 	}
 
 	/**
-	 * prepareStatementForEmployeeData method for single query to get the data from
+	 * prepareStatementForEmployeePayrollDataRetrival method for single query to get the data from
 	 * database added try and catch block to throw sql exception
 	 * 
 	 * @throws DatabaseConnectionException
@@ -253,12 +259,20 @@ public class EmployeePayrollDBService {
 	 * @return employeePayrollData
 	 * @throws DatabaseConnectionException
 	 */
-	public EmployeePayrollData addEmployeeToPayroll(String name, double salary, String gender, LocalDate startdate) throws DatabaseConnectionException {
+	public EmployeePayrollData addEmployeeToPayroll(String name, double salary, LocalDate startdate, String gender) throws DatabaseConnectionException {
 		int employeeId=-1;
+		Connection connection=null;
 		EmployeePayrollData employeePayrollData=null;
-		String sql=String.format("INSERT INTO employee_payroll (name,salary,gender,start) VALUES ('%s','%s','%s','%s')",name,salary,gender,startdate);
-		try(Connection connection=this.getConnection()){
-			Statement statement=connection.createStatement();
+		try
+		{
+			connection=this.getConnection();
+		}
+		catch (Exception e) {
+			throw new DatabaseConnectionException("Error");
+		}
+		try(Statement statement=connection.createStatement())
+		{
+		String sql=String.format("INSERT INTO employee_payroll (name,gender,salary,start) VALUES ('%s','%s','%s','%s')",name,gender,salary,startdate);
 			int rowsAffected=statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 			if(rowsAffected==1)
 			{
@@ -269,6 +283,20 @@ public class EmployeePayrollDBService {
 		}
 		catch (SQLException e) {
 			throw new DatabaseConnectionException("Could Not Add");}
+		try(Statement statement=connection.createStatement())
+		{
+			double deductions=salary*0.2;
+			double taxablePay=salary-deductions;
+			double tax=taxablePay*0.1;
+			double netPay=salary-tax;
+			String sql=String.format("INSERT INTO payroll_details (emp_id,basic_pay,deductions,taxable_pay,tax,net_pay) VALUES "
+					+ "('%s','%s','%s','%s','%s','%s')",employeeId,salary,deductions,taxablePay,tax,netPay);
+			int rowsAffected=statement.executeUpdate(sql);
+			if(rowsAffected==1)
+				employeePayrollData=new EmployeePayrollData(employeeId, name, salary, gender, startdate);
+		} catch (SQLException e) {
+			throw new DatabaseConnectionException("Not Able to add");
+		}
 		return employeePayrollData;
 	}
 }

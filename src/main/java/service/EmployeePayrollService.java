@@ -1,4 +1,9 @@
-
+/********************************************************************************************
+ * @Purpose Employee Payroll Database Service program to perform various operations in database. 
+ * @author Rosy Rupali
+ * @version 1.0
+ * @since 07-07-2021
+ ************************************************************************************************/
 package service;
 
 import java.time.LocalDate;
@@ -13,9 +18,6 @@ public class EmployeePayrollService {
 	public EmployeePayrollDBService employeePayrollDBService;
 	private List<EmployeePayrollData> employeePayrollList;
 
-	/**
-	 * 
-	 */
 	public EmployeePayrollService() {
 		this.employeePayrollDBService = EmployeePayrollDBService.getInstance();
 	}
@@ -32,7 +34,7 @@ public class EmployeePayrollService {
 	}
 
 	/**
-	 * created readEmployeePayrollData method to read data from database
+	 * created method to update the salary column of an employee in database
 	 * 
 	 * @param name   : first argument of the method
 	 * @param salary : second argument of the method
@@ -106,6 +108,6 @@ public class EmployeePayrollService {
 	 * @throws EmployeePayrollJDBCException
 	 */
 	public void addEmployeeToPayroll(String name, double salary, String gender, LocalDate startdate) throws DatabaseConnectionException {
-		employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name,salary,gender,startdate));
+		employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name,salary,startdate,gender));
 	}
 }
